@@ -91,6 +91,55 @@ const getPlantSuggestions = (userQuery, limit = 5) => {
     .map(({ score, ...plant }) => plant);
 };
 
+const diseaseAliasMap = {
+  powdery_mildew: ['powdery mildew', 'pulbos na mildew', 'harian na amag'],
+  root_rot: ['root rot', 'ugat rot', 'pagkabulok ng ugat', 'ugat bulok'],
+  leaf_spot: ['leaf spot', 'batik sa dahon', 'mga batik sa dahon'],
+  spider_mites: ['spider mites', 'kuliglig sa dahon'],
+  mealybugs: ['mealybugs', 'puting kulisap', 'puting mga kula'],
+  rice_blast: ['rice blast', 'palay blast'],
+  bacterial_blight_rice: ['rice bacterial blight', 'bacterial blight ng palay', 'sakit ng palay bacterial blight'],
+  sheath_blight: ['sheath blight', 'sheath blight ng palay', 'sakit ng palay sheath blight'],
+  tungro: ['tungro', 'tungro ng palay'],
+  downy_mildew: ['downy mildew', 'downy mildew sa palay', 'palay downy mildew'],
+  fusarium_wilt: ['fusarium wilt', 'fusarium wilt sa saging', 'sakit ng saging fusarium'],
+  anthracnose: ['anthracnose', 'sakit ng anthology', 'sakit ng prutas'],
+  black_sigatoka: ['black sigatoka', 'sigatoka', 'sakit ng saging sigatoka'],
+  panama_disease: ['panama disease', 'sakit ng saging panama', 'panama disease sa saging'],
+  citrus_greening: ['citrus greening', 'hlb', 'sakit ng citrus greening'],
+  citrus_canker: ['citrus canker', 'bukol sa citrus'],
+  bacterial_wilt: ['bacterial wilt', 'pagkabulok ng halaman', 'bacterial wilt sa halaman'],
+  late_blight: ['late blight', 'kamatis late blight', 'patatas late blight'],
+  early_blight: ['early blight', 'kamatis early blight', 'patatas early blight'],
+  mosaic_virus: ['mosaic virus', 'virus ng mosaic', 'mosaic virus sa papaya'],
+  leaf_rust: ['leaf rust', 'kalawang sa dahon'],
+  papaya_ringspot: ['papaya ringspot', 'sakit ng papaya ringspot'],
+  clubroot: ['clubroot', 'sakit sa ugat clubroot'],
+  leaf_smut: ['leaf smut', 'smut sa dahon'],
+  root_knot_nematode: ['root knot nematode', 'sakit ng ugat nematode'],
+  rice_brown_spot: ['rice brown spot', 'brown spot palay'],
+  rice_bacterial_leaf_streak: ['rice bacterial leaf streak', 'palay leaf streak'],
+  rice_sheath_rot: ['rice sheath rot', 'sheath rot palay'],
+  rice_false_smut: ['rice false smut', 'false smut palay'],
+  rice_grassy_stunt: ['rice grassy stunt', 'grassy stunt palay'],
+  rice_ragged_stunt: ['rice ragged stunt', 'ragged stunt palay'],
+  banana_bunchy_top: ['banana bunchy top', 'saging bunchy top'],
+  banana_moko: ['banana moko', 'saging moko'],
+  banana_yellow_sigatoka: ['banana yellow sigatoka', 'yellow sigatoka'],
+  corn_downy_mildew: ['corn downy mildew', 'mais downy mildew'],
+  corn_stalk_rot: ['corn stalk rot', 'mais stalk rot'],
+  corn_leaf_blight: ['corn leaf blight', 'mais leaf blight'],
+  cassava_mosaic: ['cassava mosaic', 'kamoteng kahoy mosaic'],
+  cassava_bacterial_blight: ['cassava bacterial blight', 'kamoteng kahoy bacterial blight'],
+  sweet_potato_scurf: ['sweet potato scurf', 'kamote scurf'],
+  taro_leaf_blight: ['taro leaf blight', 'gabi leaf blight'],
+  onion_purple_blotch: ['onion purple blotch', 'sibuyas purple blotch'],
+  onion_downy_mildew: ['onion downy mildew', 'sibuyas downy mildew'],
+  garlic_rust: ['garlic rust', 'bawang rust'],
+  eggplant_bacterial_wilt: ['eggplant bacterial wilt', 'talong bacterial wilt'],
+  tomato_leaf_curl: ['tomato leaf curl', 'kamatis leaf curl']
+};
+
 const getDiseaseAliases = (id, disease) => {
   const aliases = new Set();
   const nameNormalized = normalizeText(disease.name);
@@ -101,6 +150,13 @@ const getDiseaseAliases = (id, disease) => {
 
   if (Array.isArray(disease.aliases)) {
     disease.aliases
+      .map((alias) => normalizeText(alias))
+      .filter(Boolean)
+      .forEach((alias) => aliases.add(alias));
+  }
+
+  if (diseaseAliasMap[id]) {
+    diseaseAliasMap[id]
       .map((alias) => normalizeText(alias))
       .filter(Boolean)
       .forEach((alias) => aliases.add(alias));
@@ -158,6 +214,7 @@ const getDiseaseSuggestions = (userQuery, limit = 20) => {
         name: disease.name,
         symptoms: disease.symptoms,
         causes: disease.causes,
+        treatment: disease.treatment,
         score: score + extraScore
       };
     })
@@ -239,6 +296,22 @@ const analyzeQuery = (userQuery) => {
 };
 
 // Generate helpful response based on query type
+const formatDiseaseInfo = (disease) => {
+  if (!disease) return 'No record.';
+  return `**${disease.name}**\n` +
+    `Symptoms: ${disease.symptoms}\n` +
+    `Causes: ${disease.causes}\n` +
+    `Treatment:\n` +
+    disease.treatment.map((t) => `• ${t}`).join('\n');
+};
+
+const getDiseaseFromQuery = (userQuery) => {
+  const results = getDiseaseSuggestions(userQuery, 5);
+  if (results.length === 0) return null;
+  const diseaseId = results[0].id;
+  return diseaseDatabase[diseaseId] || null;
+};
+
 const generatePlantResponse = (userQuery, queryAnalysis, lastPlant) => {
   const query = userQuery.toLowerCase();
   const normalizedQuery = normalizeText(userQuery);
@@ -402,12 +475,17 @@ const generatePlantResponse = (userQuery, queryAnalysis, lastPlant) => {
     return `Common plant pests:\n\n${formatPestBlocks(pestLibrary)}`;
   }
   if (request.wantsDiseases) {
-    return 'Common plant problems:\n\n' +
-      'Fungal issues:\n' +
-      '• Powdery mildew: White coating, improve air circulation\n' +
-      '• Root rot: Mushy stems, reduce watering\n' +
-      '• Leaf spot: Brown spots, remove affected leaves\n\n' +
-      'Pest problems:\n' +
+      const diseaseMatch = getDiseaseFromQuery(userQuery);
+      if (diseaseMatch) {
+        return formatDiseaseInfo(diseaseMatch);
+      }
+      return 'Common plant problems:\n\n' +
+        'Fungal issues:\n' +
+        '• Powdery mildew: White coating, improve air circulation\n' +
+        '• Root rot: Mushy stems, reduce watering\n' +
+        '• Leaf spot: Brown spots, remove affected leaves\n' +
+        '• Tomato Bacterial Spot: Water-soaked spots, avoid overhead watering\n' +
+        '• Cucumber Downy Mildew: Yellow angular spots, improve air circulation\n\n' +
       '• Spider mites: Fine webbing, increase humidity\n' +
       '• Mealybugs: White cotton, remove with alcohol\n' +
       '• Scale: Brown bumps, scrape off\n\n' +
@@ -760,7 +838,8 @@ app.get('/api/diseases', (req, res) => {
     id: key,
     name: value.name,
     symptoms: value.symptoms,
-    causes: value.causes
+    causes: value.causes,
+    treatment: value.treatment
   }));
   res.json(diseases);
 });

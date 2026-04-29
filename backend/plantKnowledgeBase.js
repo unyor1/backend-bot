@@ -6177,5 +6177,57 @@ export const diseaseDatabase = {
       'Use reflective mulch',
       'Install insect netting'
     ]
+  },
+  tomato_bacterial_spot: {
+    name: 'Tomato Bacterial Spot',
+    aliases: ['bacterial spot', 'tomato spot', 'kamatis bacterial spot'],
+    symptoms: 'Small water-soaked spots on leaves and fruit, may turn dark and scabby',
+    causes: 'Bacterial infection spread by water splash and contaminated tools',
+    treatment: [
+      'Remove infected leaves and fruit',
+      'Avoid overhead watering',
+      'Apply copper-based bactericide',
+      'Disinfect pruning tools',
+      'Plant resistant varieties or seedlings'
+    ]
+  },
+  cucumber_downy_mildew: {
+    name: 'Cucumber Downy Mildew',
+    aliases: ['downy mildew cucumber', 'pipino downy mildew', 'cucumber mildew'],
+    symptoms: 'Yellow angular spots on leaves with grayish down on the underside',
+    causes: 'Fungal-like pathogen favored by cool, humid conditions',
+    treatment: [
+      'Improve air circulation around plants',
+      'Avoid overhead watering',
+      'Apply recommended fungicide',
+      'Remove and destroy infected leaves',
+      'Plant resistant varieties'
+    ]
+  },
+  eggplant_fruit_rot: {
+    name: 'Eggplant Fruit Rot',
+    aliases: ['talong fruit rot', 'eggplant rot', 'rot on eggplant fruit'],
+    symptoms: 'Soft, rotten patches on fruit and calyx, brown lesions',
+    causes: 'Fungal infection from wet conditions and poor air flow',
+    treatment: [
+      'Remove affected fruit and leaves',
+      'Avoid overhead irrigation',
+      'Improve spacing and airflow',
+      'Apply fungicide if needed',
+      'Harvest regularly to reduce disease pressure'
+    ]
+  },
+  okra_powdery_mildew: {
+    name: 'Okra Powdery Mildew',
+    aliases: ['okra mildew', 'okra powdery mildew', 'okra fungal growth'],
+    symptoms: 'White powdery coating on okra leaves and stems',
+    causes: 'Fungal infection in warm, dry weather with poor airflow',
+    treatment: [
+      'Remove and destroy infected leaves',
+      'Increase spacing between plants',
+      'Apply sulfur or potassium bicarbonate spray',
+      'Water at the base and avoid wetting foliage',
+      'Improve air circulation'
+    ]
   }
 };
